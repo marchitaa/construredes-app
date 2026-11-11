@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CONSTRUREDES</title>
+<style>
+  * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  body { background: #fdf5f5; margin: 0; padding: 15px; color: #333; }
+  
+  .header { text-align: center; margin-bottom: 15px; }
+  .header img { max-width: 80px; }
+  .header h1 { margin: 5px 0 0; font-size: 20px; color: #922b21; }
+
+  .card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    border-top: 4px solid #c0392b;
+    margin-bottom: 20px;
+  }
+
+  label { font-weight: bold; font-size: 13px; color: #7b241c; display: block; margin-top: 12px; }
+  input, select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border: 1px solid #e0b4b4;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
+  }
+  input:focus, select:focus { outline: none; border-color: #c0392b; }
+
+  .subseccion {
+    display: none;
+    margin-top: 15px;
+    padding: 12px;
+    background: #fff9f9;
+    border: 1px solid #f2d7d7;
+    border-radius: 8px;
+  }
+
+  /* Selector de fotos */
+  .photo-picker-box {
+    margin-top: 20px;
+    border: 2px dashed #c0392b;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    background: #fff0f0;
+    cursor: pointer;
+  }
+  .photo-picker-box span { font-size: 30px; display: block; }
+  .photo-picker-box p { margin: 5px 0 0; font-size: 14px; font-weight: bold; color: #922b21; }
+
+  /* Cuadrícula de fotos */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 8px;
+    margin-top: 15px;
+  }
+  .thumb-container {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #eee;
+  }
+  .thumb-container img {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+  }
+  .btn-remove {
+    position: absolute;
+    top: 2px; right: 2px;
+    background: rgba(192, 57, 43, 0.85);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px; height: 20px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .status-text {
+    display: none;
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  .status-loading { display: block; background: #eaf2f8; color: #2980b9; }
+  .status-success { display: block; background: #eafaf1; color: #27ae60; }
+  .status-error { display: block; background: #fdedec; color: #c0392b; }
+
+  .btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+  .btn-submit:disabled { background: #bdc3c7; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://lh3.googleusercontent.com/d/1Lh9C8-t-beRYS-tf2NH6HsLdulqkEd_J" alt="Logo">
+  <h1>CONSTRUREDES</h1>
+</div>
+
+<div class="card">
+  <label>Tipo de Proyecto *</label>
+  <select id="tipoProyecto" onchange="actualizarSecciones()">
+    <option value="">Seleccionar</option>
+    <option value="VIABILIDAD">VIABILIDAD</option>
+    <option value="REPLANTEO">REPLANTEO</option>
+    <option value="TENDIDO">TENDIDO</option>
+    <option value="FTTH">FTTH</option>
+  </select>
+
+  <label>Nombre del Proyecto *</label>
+  <input type="text" id="proyecto" placeholder="Ej: Proyecto Norte">
+
+  <label>Nombre del Técnico *</label>
+  <input type="text" id="tecnico" placeholder="Ej: Juan Pérez">
+
+  <!-- SUBSECCIÓN VIABILIDAD -->
+  <div id="secViabilidad" class="subseccion">
+    <label>Tipo de Viabilidad</label>
+    <select id="tipoViabilidad">
+      <option value="INTERNA">INTERNA</option>
+      <option value="EXTERNA">EXTERNA</option>
+    </select>
+  </div>
+
+  <!-- SUBSECCIÓN REPLANTEO -->
+  <div id="secReplanteo" class="subseccion">
+    <label>Tipo Infraestructura</label>
+    <select id="infraReplanteo">
+      <option value="CAMARAS">CAMARAS</option>
+      <option value="POSTES">POSTES</option>
+    </select>
+    <label>Operador</label>
+    <select id="operadorReplanteo">
+      <option>ETB</option><option>MOVISTAR</option><option>ENEL</option><option>OTRO</option>
+    </select>
+    <label>Nombre Infraestructura</label>
+    <input type="text" id="nombreInfraReplanteo" placeholder="Ej: CAM-04">
+  </div>
+
+  <!-- SUBSECCIÓN TENDIDO -->
+  <div id="secTendido" class="subseccion">
+    <label>Tipo Infraestructura</label>
+    <select id="infraTendido">
+      <option value="CAMARA">CAMARA</option>
+      <option value="POSTE">POSTE</option>
+      <option value="HUB">HUB</option>
+    </select>
+    <label>Operador</label>
+    <select id="operadorTendido">
+      <option>ETB</option><option>MOVISTAR</option><option>ENEL</option><option>OTRO</option>
+    </select>
+    <label>Nombre Infraestructura</label>
+    <input type="text" id="nombreInfraTendido">
+  </div>
+
+  <!-- SUBSECCIÓN FTTH -->
+  <div id="secFTTH" class="subseccion">
+    <label>Infraestructura</label>
+    <select id="infraFTTH">
+      <option value="HUB">HUB</option>
+      <option value="NAP1">NAP1</option><option value="NAP2">NAP2</option>
+      <option value="NAP3">NAP3</option><option value="NAP4">NAP4</option>
+    </select>
+  </div>
+
+  <!-- SELECTOR MÚLTIPLE DE FOTOS -->
+  <div class="photo-picker-box" onclick="document.getElementById('inputFotos').click()">
+    <span>📸</span>
+    <p>Tocar aquí para tomar o elegir fotos</p>
+    <small style="color:#7b241c;">Puedes seleccionar múltiples fotos de una sola vez</small>
+  </div>
+  <input type="file" id="inputFotos" multiple accept="image/*" style="display:none" onchange="agregarFotos(event)">
+
+  <div id="galeriaFotos" class="gallery-grid"></div>
+
+  <div id="estadoMensaje" class="status-text"></div>
+
+  <button id="btnEnviar" class="btn-submit" onclick="enviarReporte()">Enviar Evidencias</button>
+</div>
+
+<script>
+const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbyfnjYZ1owdEJjOw4Z90n6__cowo7dX2kyqx-LHq1-Mt-wH97ImCYgKr2JCzTN4Ou1q4A/exec";
+
+let listaFotos = [];
+
+window.onload = function() {
+  document.getElementById("tecnico").value = localStorage.getItem("tec") || "";
+  document.getElementById("proyecto").value = localStorage.getItem("proy") || "";
+};
+
+function actualizarSecciones() {
+  const tipo = document.getElementById("tipoProyecto").value;
+  document.getElementById("secViabilidad").style.display = (tipo === "VIABILIDAD") ? "block" : "none";
+  document.getElementById("secReplanteo").style.display = (tipo === "REPLANTEO") ? "block" : "none";
+  document.getElementById("secTendido").style.display = (tipo === "TENDIDO") ? "block" : "none";
+  document.getElementById("secFTTH").style.display = (tipo === "FTTH") ? "block" : "none";
+}
+
+function agregarFotos(event) {
+  const files = Array.from(event.target.files);
+  files.forEach(file => listaFotos.push(file));
+  renderizarGaleria();
+  event.target.value = "";
+}
+
+function renderizarGaleria() {
+  const contenedor = document.getElementById("galeriaFotos");
+  contenedor.innerHTML = "";
+  listaFotos.forEach((file, index) => {
+    const div = document.createElement("div");
+    div.className = "thumb-container";
+    div.innerHTML = `
+      <img src="${URL.createObjectURL(file)}">
+      <button class="btn-remove" onclick="removerFoto(${index})">✕</button>
+    `;
+    contenedor.appendChild(div);
+  });
+}
+
+function removerFoto(index) {
+  listaFotos.splice(index, 1);
+  renderizarGaleria();
+}
+
+function comprimir(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1400;
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          else { w = Math.round((w * maxDim) / h); h = maxDim; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.75).split(",")[1]);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function enviarReporte() {
+  const tipo = document.getElementById("tipoProyecto").value;
+  const proy = document.getElementById("proyecto").value.trim();
+  const tec = document.getElementById("tecnico").value.trim();
+
+  if (!tipo || !proy || !tec) {
+    alert("Por favor completa los campos principales");
+    return;
+  }
+  if (listaFotos.length === 0) {
+    alert("Debes seleccionar al menos una foto");
+    return;
+  }
+
+  localStorage.setItem("tec", tec);
+  localStorage.setItem("proy", proy);
+
+  let infra = "", tipoInfra = "", operador = "";
+  if (tipo === "VIABILIDAD") tipoInfra = document.getElementById("tipoViabilidad").value;
+  if (tipo === "REPLANTEO") {
+    tipoInfra = document.getElementById("infraReplanteo").value;
+    operador = document.getElementById("operadorReplanteo").value;
+    infra = document.getElementById("nombreInfraReplanteo").value;
+  }
+  if (tipo === "TENDIDO") {
+    tipoInfra = document.getElementById("infraTendido").value;
+    operador = document.getElementById("operadorTendido").value;
+    infra = document.getElementById("nombreInfraTendido").value;
+  }
+  if (tipo === "FTTH") {
+    infra = document.getElementById("infraFTTH").value;
+    tipoInfra = "FTTH";
+  }
+
+  const btn = document.getElementById("btnEnviar");
+  const estado = document.getElementById("estadoMensaje");
+  btn.disabled = true;
+
+  try {
+    const base64List = [];
+    for (let i = 0; i < listaFotos.length; i++) {
+      estado.className = "status-text status-loading";
+      estado.innerText = `⚡ Comprimiendo foto ${i + 1} de ${listaFotos.length}...`;
+      const b64 = await comprimir(listaFotos[i]);
+      base64List.push(b64);
+    }
+
+    estado.innerText = `☁️ Subiendo ${base64List.length} fotos a Google Drive...`;
+
+    const payload = {
+      datos: {
+        proyecto: proy,
+        tecnico: tec,
+        tipoProyecto: tipo,
+        tipoInfraestructura: tipoInfra,
+        operador: operador,
+        nombreInfraestructura: infra
+      },
+      base64Files: base64List
+    };
+
+    const res = await fetch(URL_GOOGLE_SCRIPT, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (data.status === "success") {
+      estado.className = "status-text status-success";
+      estado.innerText = "✅ " + data.message;
+      alert(data.message);
+      listaFotos = [];
+      renderizarGaleria();
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (err) {
+    estado.className = "status-text status-error";
+    estado.innerText = "❌ Error: " + err.message;
+    alert("Error al enviar: " + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
